@@ -6,6 +6,14 @@ export const createReview = async (
   res: Response
 ) => {
   try {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        message: "Not authorized",
+      });
+      return;
+    }
+
     const { rating, comment } = req.body;
 
     const review = await Review.create({
@@ -29,7 +37,9 @@ export const createReview = async (
       message: "Server Error",
     });
   }
-};export const getReviews = async (
+};
+
+export const getReviews = async (
   req: Request,
   res: Response
 ) => {
