@@ -1,0 +1,13 @@
+# Backend
+grocery-store/node_modules
+grocery-store/dist
+grocery-store/.env
+
+# Frontend
+grocery-store-client/node_modules
+grocery-store-client/dist
+grocery-store-client/.env
+
+# OS
+.DS_Store
+Thumbs.db
