@@ -5,7 +5,6 @@ import bcrypt from "bcryptjs";
 
 import User from "../models/user";
 import crypto from "crypto";
-import transporter from "../config/email";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -30,56 +29,17 @@ export const register = async (req: Request, res: Response) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate verification token
-    const verificationToken = crypto
-      .randomBytes(32)
-      .toString("hex");
-
-    // Create user
+    // Create user - auto-verified (email verification disabled)
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      verificationToken,
-      isVerified: false,
+      isVerified: true,
     });
-
-    // Verification link
-    const verificationLink = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
-
-    // Send email in the background — don't block the response on this
-    transporter
-      .sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "Verify Your Email",
-        html: `
-          <h2>Welcome to Grocery Store 🛒</h2>
-
-          <p>Click the button below to verify your email.</p>
-
-          
-            href="${verificationLink}"
-            style="
-              background:#16a34a;
-              color:white;
-              padding:12px 20px;
-              text-decoration:none;
-              border-radius:8px;
-            "
-          >
-            Verify Email
-          </a>
-
-          <p>If you did not create this account, you can ignore this email.</p>
-        `,
-      })
-      .catch((err) => console.error("Email send failed:", err));
 
     return res.status(201).json({
       success: true,
-      message:
-        "Registration successful. Please check your email to verify your account.",
+      message: "Registration successful! You can now login.",
     });
 
   } catch (error) {
@@ -132,7 +92,6 @@ export const verifyEmail = async (
   try {
     const { email, password } = req.body;
 
-    // Check input
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -140,26 +99,15 @@ export const verifyEmail = async (
       });
     }
 
-    // Find user
     const user = await User.findOne({ email });
 
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
 
-
-if (!user) {
-  return res.status(400).json({
-    success: false,
-    message: "Invalid email or password",
-  });
-}
-
-if (!user.isVerified) {
-  return res.status(401).json({
-    success: false,
-    message: "Please verify your email first.",
-  });
-}
-
-    // Compare password
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
@@ -169,7 +117,6 @@ if (!user.isVerified) {
       });
     }
 
-    // Create JWT
     const token = jwt.sign(
       {
         id: user._id,
