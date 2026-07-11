@@ -1,7 +1,7 @@
 # Backend
-grocery-store/node_modules
-grocery-store/dist
-grocery-store/.env
+grocery-store/server/node_modules
+grocery-store/server/dist
+grocery-store/server/.env
 
 # Frontend
 grocery-store-client/node_modules
