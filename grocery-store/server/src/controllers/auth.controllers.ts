@@ -1,7 +1,8 @@
 import authMiddleware, { AuthRequest } from "../middleware/auth.middleware";
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
+
 import User from "../models/user";
 import crypto from "crypto";
 import transporter from "../config/email";
