@@ -8,9 +8,12 @@ const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     try {
       const res = await api.post("/auth/register", {
@@ -20,10 +23,11 @@ const Register = () => {
       });
 
       alert(res.data.message);
-
       navigate("/login");
     } catch (err: any) {
       alert(err.response?.data?.message || "Registration Failed");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -62,17 +66,15 @@ const Register = () => {
         />
 
         <button
-          className="bg-green-600 hover:bg-green-700 text-white w-full py-3 rounded"
+          disabled={isSubmitting}
+          className="bg-green-600 hover:bg-green-700 text-white w-full py-3 rounded disabled:opacity-50"
         >
-          Register
+          {isSubmitting ? "Registering..." : "Register"}
         </button>
 
         <p className="mt-5 text-center">
           Already have an account?
-          <Link
-            to="/login"
-            className="text-green-600 ml-2"
-          >
+          <Link to="/login" className="text-green-600 ml-2">
             Login
           </Link>
         </p>
