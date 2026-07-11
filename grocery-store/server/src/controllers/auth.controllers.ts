@@ -47,33 +47,34 @@ export const register = async (req: Request, res: Response) => {
     // Verification link
     const verificationLink = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
 
-    // Send email
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Verify Your Email",
+    // Send email in the background — don't block the response on this
+    transporter
+      .sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Verify Your Email",
+        html: `
+          <h2>Welcome to Grocery Store 🛒</h2>
 
-      html: `
-        <h2>Welcome to Grocery Store 🛒</h2>
+          <p>Click the button below to verify your email.</p>
 
-        <p>Click the button below to verify your email.</p>
+          
+            href="${verificationLink}"
+            style="
+              background:#16a34a;
+              color:white;
+              padding:12px 20px;
+              text-decoration:none;
+              border-radius:8px;
+            "
+          >
+            Verify Email
+          </a>
 
-        <a
-          href="${verificationLink}"
-          style="
-            background:#16a34a;
-            color:white;
-            padding:12px 20px;
-            text-decoration:none;
-            border-radius:8px;
-          "
-        >
-          Verify Email
-        </a>
-
-        <p>If you did not create this account, you can ignore this email.</p>
-      `,
-    });
+          <p>If you did not create this account, you can ignore this email.</p>
+        `,
+      })
+      .catch((err) => console.error("Email send failed:", err));
 
     return res.status(201).json({
       success: true,
